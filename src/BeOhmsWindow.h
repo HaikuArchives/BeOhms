@@ -16,6 +16,7 @@
 #include <Alert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef _WINDOW_H
 #include <Window.h>

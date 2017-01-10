@@ -283,7 +283,7 @@ bool BeOhmsView::Validate(BTextControl* pTextCtrl)
 	bool 	bOk = true;
 	int nSize = 0;
 	
-	pszText = pTextCtrl->Text();
+	pszText = (char *)pTextCtrl->Text();
 	nSize = strlen(pszText);
 		
 	for (int nIndex = 0; nIndex < nSize; nIndex++)
