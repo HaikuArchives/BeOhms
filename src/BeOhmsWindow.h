@@ -17,33 +17,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifndef _WINDOW_H
 #include <Window.h>
-#endif
+#include <View.h>
 
 
 
-// Main view for the window
-class BeOhmsView : public BView
+
+// Main window for the applications
+class BeOhmsWindow : public BWindow
 {
 public:
-	BeOhmsView(BRect bounds);
-
-	virtual void 	MessageReceived(BMessage* msg);
-	virtual void 	AttachedToWindow(void);
-
-
-private:
-			void	CreateControls(void);
-			void 	Compute(void);
-			void	ComputeForVoltage(void);
-			void	ComputeForCurrent(void);
-			void	ComputeForResistance(void);
-			bool	Validate(BTextControl* pText);
-			void 	ClearForm(void);
-			
-			
+	BeOhmsWindow();
+	
+	bool 	QuitRequested(void);
+	void 	MessageReceived(BMessage * msg);
+	
+	void 	Compute(void);
+	void	ComputeForVoltage(void);
+	void	ComputeForCurrent(void);
+	void	ComputeForResistance(void);
+	bool	Validate(BTextControl* pText);
+	void 	ClearForm(void);
+	
 private:
 	static const int OPT_VOLTAGE 	 	 = 1001;
 	static const int OPT_RESISTANCE	 	 = 1002;
@@ -64,25 +59,9 @@ private:
 	BTextControl*	m_pTxtCurrent;
 	BStringView*	m_pLblOutput;
 	BTextControl*	m_pTxtOutput;
-	
-	float m_fBottom;
-	float m_fRight;
-	float m_fVCenter;
-	float m_fHCenter;	
-};
-
-
-
-// Main window for the applications
-class BeOhmsWindow : public BWindow
-{
-public:
-	BeOhmsWindow(BRect bounds);
-	
-	virtual bool 	QuitRequested(void);
-	
-private:
-	BeOhmsView*		m_pMainView;
+	BView * 		back;
+	BGroupLayout*	s_fBoxLayout;
+	BGroupLayout*	o_BoxLayout;
 };
 
 

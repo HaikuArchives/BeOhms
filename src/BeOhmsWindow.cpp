@@ -1,30 +1,101 @@
 ///////////////////////////////////////////////////
 // BeOhmsWindow.cpp
-//
 // Copyright 1999  Kyle Crane
 //
 ///////////////////////////////////////////////////
 
-#ifndef _APPLICATION_H
-#include <Application.h>
-#endif
 
-#ifndef BEOHMSWINDOW_H
 #include "BeOhmsWindow.h"
-#endif
+#include <Application.h>
+#include <LayoutBuilder.h>
 
 
-/////////////////////////////////////////////////////
-// BeOhmsWindow -- Member Functions
-//
-BeOhmsWindow::BeOhmsWindow(BRect bounds)
-: BWindow(bounds, "BeOhms", B_TITLED_WINDOW, B_NOT_RESIZABLE | B_NOT_ZOOMABLE )
+
+BeOhmsWindow::BeOhmsWindow()
+: BWindow(BRect(),"BeOhms", B_TITLED_WINDOW, B_NOT_ZOOMABLE|B_NOT_RESIZABLE)
 {
-	// Size and setup the window
-	ResizeTo(285,190);
-	BRect myBounds(Bounds());
-	m_pMainView = new BeOhmsView(myBounds);
-	AddChild(m_pMainView);
+	// Size and center the window on screen
+	ResizeTo(320,240);
+	CenterOnScreen();
+	
+	back = new BView("back", B_WILL_DRAW);
+	
+	m_pSolveGroup = new BBox("solve_group");
+	m_pSolveGroup->SetLabel("Solve For");
+	
+	m_pOptVoltage = 
+		new BRadioButton("option_voltage", "Voltage", new BMessage(OPT_VOLTAGE));
+	m_pOptResistance = 
+		new BRadioButton("option_resistance", "Resistance", new BMessage(OPT_RESISTANCE));
+	m_pOptCurrent = 
+		new BRadioButton("option_current", "Current", new BMessage(OPT_CURRENT));
+	m_pOptCurrent->SetValue(1);
+	
+	
+	m_pTxtVoltage = new BTextControl("text_voltage", "", "", NULL);
+	m_pTxtResistance = new BTextControl("text_resistance", "", "", NULL);
+	
+	m_pTxtCurrent = new BTextControl("text_current", "", "", NULL);
+	m_pTxtCurrent->Hide();
+	
+	
+	m_pLblOutput = new BStringView("label_output", "Current ---->");
+	m_pTxtOutput = new BTextControl("text_output", "", "", NULL);
+	m_pTxtOutput->SetEnabled(false);
+	
+	m_pBtnCompute = 
+		new BButton("button_compute", "Compute", new BMessage(BTN_COMPUTE_PRESSED));  	
+	m_pBtnClear =
+		new BButton("button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
+	m_pBtnExit = 
+		new BButton("button_exit", "Exit", new BMessage(BTN_EXIT_PRESSED));
+			
+			
+	BStringView* pLblCopyright = new BStringView("copy_right", "Copyright 1999  Kyle Crane");
+		
+	
+	s_fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
+		.SetInsets(10)
+    	.AddGrid(B_USE_DEFAULT_SPACING, 0.0f)
+       	  	.AddGlue(0,0)
+    	  	.AddGlue(1,0)
+			.Add(m_pOptVoltage, 0, 1)
+			.Add(m_pOptResistance, 0, 2)
+			.Add(m_pOptCurrent, 0, 3)
+			.Add(m_pTxtVoltage, 1, 1)
+			.Add(m_pTxtResistance, 1, 2)
+			.Add(m_pTxtCurrent, 1, 3)
+			.AddGlue(0,4)
+			.AddGlue(1,4)	
+		.End();
+	
+	m_pSolveGroup->AddChild(s_fBoxLayout->View());
+	
+	
+	o_BoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
+		.SetInsets(10)
+    		.Add(m_pLblOutput)
+    		.Add(m_pTxtOutput);
+	
+	
+	BLayoutBuilder::Group<>(back, B_VERTICAL, 0.0f)
+		.SetInsets(10)
+		.Add(m_pSolveGroup)
+		.Add(o_BoxLayout)
+		.AddGrid()
+			.Add(m_pBtnCompute , 0, 0)
+			.Add(m_pBtnClear, 1, 0)
+			.AddGlue(2, 0)
+			.Add(m_pBtnExit, 3, 0)
+		.End()		
+	.End();
+	
+	BLayoutBuilder::Group<>(this, B_VERTICAL, 0.0f)
+		.SetInsets(0)
+		.Add(back)
+		.Add(pLblCopyright)
+    .End();
+
 }
 
 bool BeOhmsWindow::QuitRequested()
@@ -33,23 +104,9 @@ bool BeOhmsWindow::QuitRequested()
 	return(true);
 }
 
-
-
-//////////////////////////////////////////////////////
-// BeOhmsView -- Member Functions
-//
-BeOhmsView::BeOhmsView(BRect bounds)
-: BView(bounds, "main_view", B_FOLLOW_ALL_SIDES, B_WILL_DRAW)
+void BeOhmsWindow::MessageReceived(BMessage* msg)
 {
-	// Get some handy measurements
-	m_fRight = bounds.Width();
-	m_fBottom = bounds.Height();
-	m_fVCenter = m_fBottom / 2;
-	m_fHCenter = m_fRight / 2;
-}
-
-void BeOhmsView::MessageReceived(BMessage* msg)
-{
+		
 	int nValue = msg->what;
 	
 	// Respond to messages sent from the controls
@@ -94,103 +151,19 @@ void BeOhmsView::MessageReceived(BMessage* msg)
 	{
 		ClearForm();
 	}
+	
 	else if (nValue == BTN_EXIT_PRESSED)
 	{
-		Window()->PostMessage(B_QUIT_REQUESTED);
+		PostMessage(B_QUIT_REQUESTED);
 		
 	}
+
 	else
 		// No messages for me
-		BView::MessageReceived(msg);
+		BWindow::MessageReceived(msg);
 }
 
-void BeOhmsView::AttachedToWindow(void)
-{
-	// Do some initialization
-	SetViewColor(210,210,210);
-	CreateControls();
-}
-
-void BeOhmsView::CreateControls(void)
-{
-	float fButtonWidth = 70.00;
-
-	// Create the controls for this view
-	BRect groupRect(10,10,275,100);
-	m_pSolveGroup = new BBox(groupRect, "solve_group");
-	m_pSolveGroup->SetLabel("Solve For");
-	AddChild(m_pSolveGroup);
-	
-	BRect optVoltageRect(10,15,100,30);
-	m_pOptVoltage = 
-		new BRadioButton(optVoltageRect, "option_voltage", "Voltage", new BMessage(OPT_VOLTAGE));
-	m_pSolveGroup->AddChild(m_pOptVoltage);
-	
-	BRect optResistanceRect(10,40,100,55);
-	m_pOptResistance = 
-		new BRadioButton(optResistanceRect, "option_resistance", "Resistance", new BMessage(OPT_RESISTANCE));
-	m_pSolveGroup->AddChild(m_pOptResistance);
-	
-	BRect optCurrentRect(10,65,100,80);
-	m_pOptCurrent = 
-		new BRadioButton(optCurrentRect, "option_current", "Current", new BMessage(OPT_CURRENT));
-	m_pSolveGroup->AddChild(m_pOptCurrent);
-	m_pOptCurrent->SetValue(1);
-	
-	BRect txtVoltageRect(120,15,250,30);
-	m_pTxtVoltage = new BTextControl(txtVoltageRect, "text_voltage", "", "", NULL);
-	m_pTxtVoltage->SetDivider(0);
-	m_pSolveGroup->AddChild(m_pTxtVoltage);
-	
-	BRect txtResistanceRect(120,40,250,55);
-	m_pTxtResistance = new BTextControl(txtResistanceRect, "text_resistance", "", "", NULL);
-	m_pTxtResistance->SetDivider(0);
-	m_pSolveGroup->AddChild(m_pTxtResistance);
-	
-	BRect txtCurrentRect(120,65,250,80);
-	m_pTxtCurrent = new BTextControl(txtCurrentRect, "text_current", "", "", NULL);
-	m_pTxtCurrent->SetDivider(0);
-	m_pSolveGroup->AddChild(m_pTxtCurrent);
-	m_pTxtCurrent->Hide();
-	
-	BRect lblOutputRect(20,105,125,120);
-	m_pLblOutput = new BStringView(lblOutputRect, "label_output", "Current ---->");
-	AddChild(m_pLblOutput);
-	
-	BRect txtOutputRect(130,105,260,120);
-	m_pTxtOutput = new BTextControl(txtOutputRect, "text_output", "", "", NULL);
-	m_pTxtOutput->SetDivider(0);
-	m_pTxtOutput->SetEnabled(false);
-	AddChild(m_pTxtOutput);
-	
-	BRect btnComputeRect(10,140,70,170);
-	m_pBtnCompute = 
-		new BButton(btnComputeRect, "button_compute", "Compute", new BMessage(BTN_COMPUTE_PRESSED));  	
-	AddChild(m_pBtnCompute);
-	
-	BRect btnClearRect(80,140,140,170);
-	m_pBtnClear =
-		new BButton(btnClearRect, "button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
-	AddChild(m_pBtnClear);
-	
-	BRect btnExitRect((m_fRight - 10 - fButtonWidth), 140, (m_fRight - 10), 170);
-	m_pBtnExit = 
-		new BButton(btnExitRect, "button_exit", "Exit", new BMessage(BTN_EXIT_PRESSED));
-	AddChild(m_pBtnExit);
-	
-	BRect lblCopyrightRect(10,180,150,190);
-	BStringView* pLblCopyright = new BStringView(lblCopyrightRect, "copy_right", "Copyright 1999  Kyle Crane");
-	AddChild(pLblCopyright);
-	
-	m_pOptVoltage->SetTarget(this);
-	m_pOptResistance->SetTarget(this);
-	m_pOptCurrent->SetTarget(this);		 	
-	m_pBtnCompute->SetTarget(this);
-	m_pBtnClear->SetTarget(this);
-	m_pBtnExit->SetTarget(this);
-}
-
-void BeOhmsView::Compute(void)
+void BeOhmsWindow::Compute(void)
 {
 	if (m_pOptVoltage->Value() != 0)
 		ComputeForVoltage();
@@ -200,7 +173,7 @@ void BeOhmsView::Compute(void)
 		ComputeForResistance();
 }
 
-void BeOhmsView::ComputeForVoltage(void)
+void BeOhmsWindow::ComputeForVoltage(void)
 {
 	if (Validate(m_pTxtCurrent) && Validate(m_pTxtResistance))
 	{
@@ -224,7 +197,7 @@ void BeOhmsView::ComputeForVoltage(void)
 	}
 }
 
-void BeOhmsView::ComputeForCurrent(void)
+void BeOhmsWindow::ComputeForCurrent(void)
 {
 	if (Validate(m_pTxtVoltage) && Validate(m_pTxtResistance))
 	{
@@ -248,7 +221,7 @@ void BeOhmsView::ComputeForCurrent(void)
 	}
 }
 
-void BeOhmsView::ComputeForResistance(void)
+void BeOhmsWindow::ComputeForResistance(void)
 {
 
 	if(Validate(m_pTxtVoltage) && Validate(m_pTxtCurrent))
@@ -273,7 +246,7 @@ void BeOhmsView::ComputeForResistance(void)
 	}
 }
 
-bool BeOhmsView::Validate(BTextControl* pTextCtrl)
+bool BeOhmsWindow::Validate(BTextControl* pTextCtrl)
 {
 	// First make sure each character is one that is valid
 	// as a number 1(-)<-Must be first, 1(.), 1234567890
@@ -340,7 +313,7 @@ bool BeOhmsView::Validate(BTextControl* pTextCtrl)
 	return bOk;
 }
 
-void BeOhmsView::ClearForm(void)
+void BeOhmsWindow::ClearForm(void)
 {
 	// Send a phony message to reset the for to
 	// its default state
@@ -354,3 +327,4 @@ void BeOhmsView::ClearForm(void)
 	m_pTxtCurrent->SetText("");				
 	m_pTxtOutput->SetText("");
 }
+
