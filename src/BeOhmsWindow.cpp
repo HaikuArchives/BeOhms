@@ -58,7 +58,7 @@ BeOhmsWindow::BeOhmsWindow()
 		.SetInsets(10)
     	.AddGrid(B_USE_DEFAULT_SPACING, 0.0f)
        	  	.AddGlue(0,0)
-    	  	.AddGlue(1,0)
+       	  	.AddGlue(1,0)
 			.Add(m_pOptVoltage, 0, 1)
 			.Add(m_pOptResistance, 0, 2)
 			.Add(m_pOptCurrent, 0, 3)
@@ -79,7 +79,7 @@ BeOhmsWindow::BeOhmsWindow()
 	
 	
 	BLayoutBuilder::Group<>(back, B_VERTICAL, 0.0f)
-		.SetInsets(10)
+		.SetInsets(10,10,10,0)
 		.Add(m_pSolveGroup)
 		.Add(o_BoxLayout)
 		.AddGrid()
@@ -87,13 +87,14 @@ BeOhmsWindow::BeOhmsWindow()
 			.Add(m_pBtnClear, 1, 0)
 			.AddGlue(2, 0)
 			.Add(m_pBtnExit, 3, 0)
-		.End()		
+		.End()
+		.AddStrut(10)
+		.Add(pLblCopyright)		
 	.End();
 	
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0.0f)
 		.SetInsets(0)
 		.Add(back)
-		.Add(pLblCopyright)
     .End();
 
 }
