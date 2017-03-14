@@ -29,14 +29,14 @@ APP_MIME_SIG =
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
 SRCS = \
-	 BeOhms.cpp  \
-	 BeOhmsWindow.cpp  \
+	 src/App.cpp  \
+	 src/BeOhmsWindow.cpp  \
 
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
 RDEFS = \
-	 Resource.rdef  \
+	 src/Resource.rdef  \
 
 
 #	Specify the resource files to use. Full or relative paths can be used.
