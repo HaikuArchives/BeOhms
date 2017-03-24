@@ -5,10 +5,11 @@
 ///////////////////////////////////////////////////
 
 
-#include "BeOhmsWindow.h"
 #include <Application.h>
 #include <LayoutBuilder.h>
 
+#include "BeOhmsWindow.h"
+#include "Constants.h"
 
 
 BeOhmsWindow::BeOhmsWindow()
@@ -61,8 +62,6 @@ BeOhmsWindow::BeOhmsWindow()
 		new BButton("button_compute", "Compute", new BMessage(BTN_COMPUTE_PRESSED));  	
 	m_pBtnClear =
 		new BButton("button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
-	m_pBtnExit = 
-		new BButton("button_exit", "Exit", new BMessage(BTN_EXIT_PRESSED));
 				
 	
 	s_fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
@@ -94,10 +93,9 @@ BeOhmsWindow::BeOhmsWindow()
 		.Add(m_pSolveGroup)
 		.Add(o_BoxLayout)
 		.AddGrid()
-			.Add(m_pBtnCompute , 0, 0)
-			.Add(m_pBtnClear, 1, 0)
-			.AddGlue(2, 0)
-			.Add(m_pBtnExit, 3, 0)
+			.AddGlue(0, 0)
+			.Add(m_pBtnCompute, 1, 0)
+			.Add(m_pBtnClear, 2, 0)
 		.End()
 		.AddStrut(10)
 		.End();
@@ -169,13 +167,6 @@ void BeOhmsWindow::MessageReceived(BMessage* msg)
 	{
 		ClearForm();
 	}
-	
-	else if (nValue == BTN_EXIT_PRESSED)
-	{
-		PostMessage(B_QUIT_REQUESTED);
-		
-	}
-
 	else
 		// No messages for me
 		BWindow::MessageReceived(msg);
