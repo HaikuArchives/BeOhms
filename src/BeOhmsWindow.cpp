@@ -18,10 +18,10 @@ BeOhmsWindow::BeOhmsWindow()
 		B_NOT_ZOOMABLE|B_NOT_RESIZABLE)
 {
 	// Size and center the window on screen
-	ResizeTo(360,260);
+	ResizeTo(360, 260);
 	CenterOnScreen();
 	
-	back = new BView("back", B_WILL_DRAW);
+	fBack = new BView("back", B_WILL_DRAW);
 	
 	fMenuBar = new BMenuBar("MenuBar");
 	
@@ -35,67 +35,65 @@ BeOhmsWindow::BeOhmsWindow()
 	
 	fMenuBar->AddItem(fAppMenu);
 	
-	m_pSolveGroup = new BBox("solve_group");
-	m_pSolveGroup->SetLabel("Solve For");
+	fSolveGroup = new BBox("solve_group");
+	fSolveGroup->SetLabel("Solve For");
 	
-	m_pOptVoltage = 
+	fOptVoltage = 
 		new BRadioButton("option_voltage", "Voltage", new BMessage(OPT_VOLTAGE));
-	m_pOptResistance = 
+	fOptResistance = 
 		new BRadioButton("option_resistance", "Resistance", new BMessage(OPT_RESISTANCE));
-	m_pOptCurrent = 
+	fOptCurrent = 
 		new BRadioButton("option_current", "Current", new BMessage(OPT_CURRENT));
-	m_pOptCurrent->SetValue(1);
+	fOptCurrent->SetValue(1);
 	
 	
-	m_pTxtVoltage = new BTextControl("text_voltage", "", "", NULL);
-	m_pTxtResistance = new BTextControl("text_resistance", "", "", NULL);
+	fTxtVoltage = new BTextControl("text_voltage", "", "", NULL);
+	fTxtResistance = new BTextControl("text_resistance", "", "", NULL);
 	
-	m_pTxtCurrent = new BTextControl("text_current", "", "", NULL);
-	m_pTxtCurrent->Hide();
+	fTxtCurrent = new BTextControl("text_current", "", "", NULL);
+	fTxtCurrent->Hide();
 	
 	
-	m_pLblOutput = new BStringView("label_output", "Current ---->");
-	m_pTxtOutput = new BTextControl("text_output", "", "", NULL);
-	m_pTxtOutput->SetEnabled(false);
+	fLblOutput = new BStringView("label_output", "Current ---->");
+	fTxtOutput = new BTextControl("text_output", "", "", NULL);
+	fTxtOutput->SetEnabled(false);
 	
-	m_pBtnCompute = 
+	fBtnCompute = 
 		new BButton("button_compute", "Compute", new BMessage(BTN_COMPUTE_PRESSED));  	
-	m_pBtnClear =
+	fBtnClear =
 		new BButton("button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
 				
 	
-	s_fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
+	fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
 		.SetInsets(10)
 		.AddGrid(B_USE_DEFAULT_SPACING, 0.0f)
 		.AddGlue(0,0)
 		.AddGlue(1,0)
-			.Add(m_pOptVoltage, 0, 1)
-			.Add(m_pOptResistance, 0, 2)
-			.Add(m_pOptCurrent, 0, 3)
-			.Add(m_pTxtVoltage, 1, 1)
-			.Add(m_pTxtResistance, 1, 2)
-			.Add(m_pTxtCurrent, 1, 3)
-			.AddGlue(0,4)
-			.AddGlue(1,4)
+			.Add(fOptVoltage, 0, 1)
+			.Add(fOptResistance, 0, 2)
+			.Add(fOptCurrent, 0, 3)
+			.Add(fTxtVoltage, 1, 1)
+			.Add(fTxtResistance, 1, 2)
+			.Add(fTxtCurrent, 1, 3)
+			.AddGlue(0, 4)
+			.AddGlue(1, 4)
 		.End();
 	
-	m_pSolveGroup->AddChild(s_fBoxLayout->View());
+	fSolveGroup->AddChild(fBoxLayout->View());
 	
 	
-	o_BoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
-		.SetInsets(10)
-    		.Add(m_pLblOutput)
-    		.Add(m_pTxtOutput);
-	
-	
-	BLayoutBuilder::Group<>(back, B_VERTICAL, 0.0f)
+	BLayoutBuilder::Group<>(fBack, B_VERTICAL, 0.0f)
 		.SetInsets(10,10,10,0)
-		.Add(m_pSolveGroup)
-		.Add(o_BoxLayout)
+		.Add(fSolveGroup)
+		.AddGroup(B_HORIZONTAL)
+			.SetInsets(10)
+			.Add(fLblOutput)
+    		.Add(fTxtOutput)
+    	.End()
 		.AddGrid()
 			.AddGlue(0, 0)
-			.Add(m_pBtnCompute, 1, 0)
-			.Add(m_pBtnClear, 2, 0)
+			.Add(fBtnCompute, 1, 0)
+			.Add(fBtnClear, 2, 0)
 		.End()
 		.AddStrut(10)
 		.End();
@@ -104,158 +102,177 @@ BeOhmsWindow::BeOhmsWindow()
 		.SetInsets(0)
 		.Add(fMenuBar)
 		.AddGlue()
-		.Add(back)
+		.Add(fBack)
 		.AddGlue()
 		.End();
 }
 
-bool BeOhmsWindow::QuitRequested()
+
+bool
+BeOhmsWindow::QuitRequested()
 {
 	be_app->PostMessage(B_QUIT_REQUESTED);
-	return(true);
+	return true;
 }
 
-void BeOhmsWindow::MessageReceived(BMessage* msg)
-{
+
+void
+BeOhmsWindow::MessageReceived(BMessage* msg)
+{		
+	switch(msg->what) {
 		
-	int nValue = msg->what;
+		case MENU_APP_QUIT:
+			be_app->PostMessage(B_QUIT_REQUESTED);
+			break;
 	
-	if (nValue == MENU_APP_QUIT)
-	{
-		be_app->PostMessage(B_QUIT_REQUESTED);
-	}
+		// Respond to messages sent from the controls
+		case OPT_VOLTAGE:
+		{
+			if (!fTxtVoltage->IsHidden())
+				fTxtVoltage->Hide();
+			if (fTxtResistance->IsHidden())
+				fTxtResistance->Show();
+			if (fTxtCurrent->IsHidden())
+				fTxtCurrent->Show();
+			fLblOutput->SetText("Voltage ---->");
+			fTxtOutput->SetText("");
+			break;
+		}
 	
-	// Respond to messages sent from the controls
-	else if(nValue == OPT_VOLTAGE)
-	{
-		if (!m_pTxtVoltage->IsHidden())
-			m_pTxtVoltage->Hide();
-		if (m_pTxtResistance->IsHidden())
-			m_pTxtResistance->Show();
-		if (m_pTxtCurrent->IsHidden())
-			m_pTxtCurrent->Show();
-		m_pLblOutput->SetText("Voltage ---->");
-		m_pTxtOutput->SetText("");
+		case OPT_CURRENT:
+		{
+			if (fTxtVoltage->IsHidden())
+				fTxtVoltage->Show();
+			if (fTxtResistance->IsHidden())
+				fTxtResistance->Show();
+			if (!fTxtCurrent->IsHidden())
+				fTxtCurrent->Hide();
+			fLblOutput->SetText("Current ---->");
+			fTxtOutput->SetText("");	
+			break;
+		}
+	
+		case OPT_RESISTANCE:
+		{
+			if (fTxtVoltage->IsHidden())
+				fTxtVoltage->Show();
+			if (!fTxtResistance->IsHidden())
+				fTxtResistance->Hide();
+			if (fTxtCurrent->IsHidden())
+				fTxtCurrent->Show();
+			fLblOutput->SetText("Resistance ---->");
+			fTxtOutput->SetText("");
+			break;
+		}
+	
+		case BTN_COMPUTE_PRESSED:
+			Compute();
+			break;
+
+		case BTN_CLEAR_PRESSED:
+			ClearForm();
+			break;
+	
+		default:
+			BWindow::MessageReceived(msg);
+			break;
 	}
-	else if (nValue == OPT_CURRENT)
-	{
-		if (m_pTxtVoltage->IsHidden())
-			m_pTxtVoltage->Show();
-		if (m_pTxtResistance->IsHidden())
-			m_pTxtResistance->Show();
-		if (!m_pTxtCurrent->IsHidden())
-			m_pTxtCurrent->Hide();
-		m_pLblOutput->SetText("Current ---->");
-		m_pTxtOutput->SetText("");	
-	}
-	else if (nValue == OPT_RESISTANCE)
-	{
-		if (m_pTxtVoltage->IsHidden())
-			m_pTxtVoltage->Show();
-		if (!m_pTxtResistance->IsHidden())
-			m_pTxtResistance->Hide();
-		if (m_pTxtCurrent->IsHidden())
-			m_pTxtCurrent->Show();
-		m_pLblOutput->SetText("Resistance ---->");
-		m_pTxtOutput->SetText("");
-	}
-	else if (nValue == BTN_COMPUTE_PRESSED)
-	{
-		Compute();
-	}
-	else if (nValue == BTN_CLEAR_PRESSED)
-	{
-		ClearForm();
-	}
-	else
-		// No messages for me
-		BWindow::MessageReceived(msg);
 }
 
-void BeOhmsWindow::Compute(void)
+
+void
+BeOhmsWindow::Compute(void)
 {
-	if (m_pOptVoltage->Value() != 0)
+	if (fOptVoltage->Value() != 0)
 		ComputeForVoltage();
-	else if (m_pOptCurrent->Value() != 0)
+	else if (fOptCurrent->Value() != 0)
 		ComputeForCurrent();
 	else
 		ComputeForResistance();
 }
 
-void BeOhmsWindow::ComputeForVoltage(void)
+
+void
+BeOhmsWindow::ComputeForVoltage(void)
 {
-	if (Validate(m_pTxtCurrent) && Validate(m_pTxtResistance))
+	if (Validate(fTxtCurrent) && Validate(fTxtResistance))
 	{
 		char* pszResult = new char[50];
 		float fCurrent, fResistance, fVoltage;
 		fCurrent = fResistance = fVoltage = 0;
 	
-		fCurrent = atof(m_pTxtCurrent->Text());
-		fResistance = atof(m_pTxtResistance->Text());
+		fCurrent = atof(fTxtCurrent->Text());
+		fResistance = atof(fTxtResistance->Text());
 		fVoltage = fCurrent * fResistance;
 		sprintf(pszResult, "%g", fVoltage);
 	
-		m_pTxtVoltage->SetText(pszResult);
-		m_pTxtOutput->SetText(pszResult);
+		fTxtVoltage->SetText(pszResult);
+		fTxtOutput->SetText(pszResult);
 		delete pszResult;
 	}
 	else
 	{
-		m_pTxtOutput->SetText("--- ERROR ---");		
-		m_pTxtVoltage->SetText("");
+		fTxtOutput->SetText("--- ERROR ---");		
+		fTxtVoltage->SetText("");
 	}
 }
 
-void BeOhmsWindow::ComputeForCurrent(void)
+
+void
+BeOhmsWindow::ComputeForCurrent(void)
 {
-	if (Validate(m_pTxtVoltage) && Validate(m_pTxtResistance))
+	if (Validate(fTxtVoltage) && Validate(fTxtResistance))
 	{
 		char* pszResult = new char[50];
 		float fCurrent, fResistance, fVoltage;
 		fCurrent = fResistance = fVoltage = 0;
 	
-		fResistance = atof(m_pTxtResistance->Text());
-		fVoltage = atof(m_pTxtVoltage->Text());
+		fResistance = atof(fTxtResistance->Text());
+		fVoltage = atof(fTxtVoltage->Text());
 		fCurrent = fVoltage/fResistance;
 		sprintf(pszResult, "%g", fCurrent);
 	
-		m_pTxtCurrent->SetText(pszResult);
-		m_pTxtOutput->SetText(pszResult);
+		fTxtCurrent->SetText(pszResult);
+		fTxtOutput->SetText(pszResult);
 		delete pszResult;
 	}
 	else
 	{
-		m_pTxtOutput->SetText("--- ERROR ---");
-		m_pTxtCurrent->SetText("");
+		fTxtOutput->SetText("--- ERROR ---");
+		fTxtCurrent->SetText("");
 	}
 }
 
-void BeOhmsWindow::ComputeForResistance(void)
+
+void
+BeOhmsWindow::ComputeForResistance(void)
 {
 
-	if(Validate(m_pTxtVoltage) && Validate(m_pTxtCurrent))
+	if(Validate(fTxtVoltage) && Validate(fTxtCurrent))
 	{
 		char* pszResult = new char[50];
 		float fCurrent, fResistance, fVoltage;
 		fCurrent = fResistance = fVoltage = 0;
 	
-		fVoltage = atof(m_pTxtVoltage->Text());
-		fCurrent = atof(m_pTxtCurrent->Text());
+		fVoltage = atof(fTxtVoltage->Text());
+		fCurrent = atof(fTxtCurrent->Text());
 		fResistance = fVoltage/fCurrent;
 		sprintf(pszResult, "%g", fResistance);
 	
-		m_pTxtResistance->SetText(pszResult);
-		m_pTxtOutput->SetText(pszResult);
+		fTxtResistance->SetText(pszResult);
+		fTxtOutput->SetText(pszResult);
 		delete pszResult;
 	}
 	else
 	{
-		m_pTxtResistance->SetText("");
-		m_pTxtOutput->SetText("--- ERROR ---");
+		fTxtResistance->SetText("");
+		fTxtOutput->SetText("--- ERROR ---");
 	}
 }
 
-bool BeOhmsWindow::Validate(BTextControl* pTextCtrl)
+
+bool
+BeOhmsWindow::Validate(BTextControl* pTextCtrl)
 {
 	// First make sure each character is one that is valid
 	// as a number 1(-)<-Must be first, 1(.), 1234567890
@@ -322,18 +339,20 @@ bool BeOhmsWindow::Validate(BTextControl* pTextCtrl)
 	return bOk;
 }
 
-void BeOhmsWindow::ClearForm(void)
+
+void
+BeOhmsWindow::ClearForm(void)
 {
 	// Send a phony message to reset the for to
 	// its default state
 	BMessage* msg = new BMessage(OPT_CURRENT);
-	m_pOptCurrent->SetValue(1);
+	fOptCurrent->SetValue(1);
 	MessageReceived(msg);
 	
 	// Now clear all text boxes
-	m_pTxtVoltage->SetText("");
-	m_pTxtResistance->SetText("");
-	m_pTxtCurrent->SetText("");				
-	m_pTxtOutput->SetText("");
+	fTxtVoltage->SetText("");
+	fTxtResistance->SetText("");
+	fTxtCurrent->SetText("");				
+	fTxtOutput->SetText("");
 }
 

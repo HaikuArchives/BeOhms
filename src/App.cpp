@@ -14,7 +14,6 @@ const char* bSignature = "application/x-vnd.OHM-BeOhms";
 App::App(void)
 	: BApplication(bSignature)
 { 
-	
 	fMainWindow = new BeOhmsWindow();
 	fMainWindow->Show();
 }
