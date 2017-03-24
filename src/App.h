@@ -16,10 +16,10 @@
 class App : public BApplication {
 public:
 		App(void);
-		
+	void	AboutRequested();		
+
 private:
-	
-		BeOhmsWindow*   mainWindow;
+	BeOhmsWindow*	fMainWindow;
 };
 
 

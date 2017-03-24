@@ -12,13 +12,27 @@
 
 
 BeOhmsWindow::BeOhmsWindow()
-: BWindow(BRect(),"BeOhms", B_TITLED_WINDOW, B_NOT_ZOOMABLE|B_NOT_RESIZABLE)
+	:
+	BWindow(BRect(),"BeOhms", B_TITLED_WINDOW, 
+		B_NOT_ZOOMABLE|B_NOT_RESIZABLE)
 {
 	// Size and center the window on screen
-	ResizeTo(320,240);
+	ResizeTo(360,260);
 	CenterOnScreen();
 	
 	back = new BView("back", B_WILL_DRAW);
+	
+	fMenuBar = new BMenuBar("MenuBar");
+	
+	fAppMenu = new BMenu("App");
+	
+	BMenuItem * item = new BMenuItem("About", new BMessage(B_ABOUT_REQUESTED));
+	item->SetTarget(be_app);
+	fAppMenu->AddItem(item);
+	fAppMenu->AddSeparatorItem();
+	fAppMenu->AddItem(new BMenuItem("Quit", new BMessage(MENU_APP_QUIT), 'Q', B_COMMAND_KEY));
+	
+	fMenuBar->AddItem(fAppMenu);
 	
 	m_pSolveGroup = new BBox("solve_group");
 	m_pSolveGroup->SetLabel("Solve For");
@@ -49,16 +63,13 @@ BeOhmsWindow::BeOhmsWindow()
 		new BButton("button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
 	m_pBtnExit = 
 		new BButton("button_exit", "Exit", new BMessage(BTN_EXIT_PRESSED));
-			
-			
-	BStringView* pLblCopyright = new BStringView("copy_right", "Copyright 1999  Kyle Crane");
-		
+				
 	
 	s_fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
 		.SetInsets(10)
-    	.AddGrid(B_USE_DEFAULT_SPACING, 0.0f)
-       	  	.AddGlue(0,0)
-       	  	.AddGlue(1,0)
+		.AddGrid(B_USE_DEFAULT_SPACING, 0.0f)
+		.AddGlue(0,0)
+		.AddGlue(1,0)
 			.Add(m_pOptVoltage, 0, 1)
 			.Add(m_pOptResistance, 0, 2)
 			.Add(m_pOptCurrent, 0, 3)
@@ -66,7 +77,7 @@ BeOhmsWindow::BeOhmsWindow()
 			.Add(m_pTxtResistance, 1, 2)
 			.Add(m_pTxtCurrent, 1, 3)
 			.AddGlue(0,4)
-			.AddGlue(1,4)	
+			.AddGlue(1,4)
 		.End();
 	
 	m_pSolveGroup->AddChild(s_fBoxLayout->View());
@@ -89,14 +100,15 @@ BeOhmsWindow::BeOhmsWindow()
 			.Add(m_pBtnExit, 3, 0)
 		.End()
 		.AddStrut(10)
-		.Add(pLblCopyright)		
-	.End();
+		.End();
 	
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0.0f)
 		.SetInsets(0)
+		.Add(fMenuBar)
+		.AddGlue()
 		.Add(back)
-    .End();
-
+		.AddGlue()
+		.End();
 }
 
 bool BeOhmsWindow::QuitRequested()
@@ -110,8 +122,13 @@ void BeOhmsWindow::MessageReceived(BMessage* msg)
 		
 	int nValue = msg->what;
 	
+	if (nValue == MENU_APP_QUIT)
+	{
+		be_app->PostMessage(B_QUIT_REQUESTED);
+	}
+	
 	// Respond to messages sent from the controls
-	if(nValue == OPT_VOLTAGE)
+	else if(nValue == OPT_VOLTAGE)
 	{
 		if (!m_pTxtVoltage->IsHidden())
 			m_pTxtVoltage->Hide();

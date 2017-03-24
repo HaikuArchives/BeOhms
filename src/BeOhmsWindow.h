@@ -19,7 +19,8 @@
 #include <string.h>
 #include <Window.h>
 #include <View.h>
-
+#include <MenuBar.h>
+#include <MenuItem.h>
 
 
 
@@ -40,6 +41,7 @@ public:
 	void 	ClearForm(void);
 	
 private:
+	static const int MENU_APP_QUIT		= 1000;
 	static const int OPT_VOLTAGE 	 	 = 1001;
 	static const int OPT_RESISTANCE	 	 = 1002;
 	static const int OPT_CURRENT		 = 1003;
@@ -62,6 +64,8 @@ private:
 	BView * 		back;
 	BGroupLayout*	s_fBoxLayout;
 	BGroupLayout*	o_BoxLayout;
+	BMenuBar*	fMenuBar;
+	BMenu*		fAppMenu;
 };
 
 
