@@ -9,7 +9,6 @@
 #include <LayoutBuilder.h>
 
 #include "BeOhmsWindow.h"
-#include "Constants.h"
 
 
 BeOhmsWindow::BeOhmsWindow()
@@ -31,7 +30,7 @@ BeOhmsWindow::BeOhmsWindow()
 	item->SetTarget(be_app);
 	fAppMenu->AddItem(item);
 	fAppMenu->AddSeparatorItem();
-	fAppMenu->AddItem(new BMenuItem("Quit", new BMessage(MENU_APP_QUIT), 'Q', B_COMMAND_KEY));
+	fAppMenu->AddItem(new BMenuItem("Quit", new BMessage(kMenuAppQuit), 'Q', B_COMMAND_KEY));
 	
 	fMenuBar->AddItem(fAppMenu);
 	
@@ -39,11 +38,11 @@ BeOhmsWindow::BeOhmsWindow()
 	fSolveGroup->SetLabel("Solve For");
 	
 	fOptVoltage = 
-		new BRadioButton("option_voltage", "Voltage", new BMessage(OPT_VOLTAGE));
+		new BRadioButton("option_voltage", "Voltage", new BMessage(kOptVoltage));
 	fOptResistance = 
-		new BRadioButton("option_resistance", "Resistance", new BMessage(OPT_RESISTANCE));
+		new BRadioButton("option_resistance", "Resistance", new BMessage(kOptResistance));
 	fOptCurrent = 
-		new BRadioButton("option_current", "Current", new BMessage(OPT_CURRENT));
+		new BRadioButton("option_current", "Current", new BMessage(kOptCurrent));
 	fOptCurrent->SetValue(1);
 	
 	
@@ -59,9 +58,9 @@ BeOhmsWindow::BeOhmsWindow()
 	fTxtOutput->SetEnabled(false);
 	
 	fBtnCompute = 
-		new BButton("button_compute", "Compute", new BMessage(BTN_COMPUTE_PRESSED));  	
+		new BButton("button_compute", "Compute", new BMessage(kComputePressed));
 	fBtnClear =
-		new BButton("button_clear", "Clear", new BMessage(BTN_CLEAR_PRESSED));
+		new BButton("button_clear", "Clear", new BMessage(kClearPressed));
 				
 	
 	fBoxLayout = BLayoutBuilder::Group<>(B_HORIZONTAL)
@@ -89,7 +88,7 @@ BeOhmsWindow::BeOhmsWindow()
 			.SetInsets(10)
 			.Add(fLblOutput)
     		.Add(fTxtOutput)
-    	.End()
+		.End()
 		.AddGrid()
 			.AddGlue(0, 0)
 			.Add(fBtnCompute, 1, 0)
@@ -121,12 +120,12 @@ BeOhmsWindow::MessageReceived(BMessage* msg)
 {		
 	switch(msg->what) {
 		
-		case MENU_APP_QUIT:
+		case kMenuAppQuit:
 			be_app->PostMessage(B_QUIT_REQUESTED);
 			break;
 	
 		// Respond to messages sent from the controls
-		case OPT_VOLTAGE:
+		case kOptVoltage:
 		{
 			if (!fTxtVoltage->IsHidden())
 				fTxtVoltage->Hide();
@@ -139,7 +138,7 @@ BeOhmsWindow::MessageReceived(BMessage* msg)
 			break;
 		}
 	
-		case OPT_CURRENT:
+		case kOptCurrent:
 		{
 			if (fTxtVoltage->IsHidden())
 				fTxtVoltage->Show();
@@ -152,7 +151,7 @@ BeOhmsWindow::MessageReceived(BMessage* msg)
 			break;
 		}
 	
-		case OPT_RESISTANCE:
+		case kOptResistance:
 		{
 			if (fTxtVoltage->IsHidden())
 				fTxtVoltage->Show();
@@ -165,11 +164,11 @@ BeOhmsWindow::MessageReceived(BMessage* msg)
 			break;
 		}
 	
-		case BTN_COMPUTE_PRESSED:
+		case kComputePressed:
 			Compute();
 			break;
 
-		case BTN_CLEAR_PRESSED:
+		case kClearPressed:
 			ClearForm();
 			break;
 	
@@ -345,7 +344,7 @@ BeOhmsWindow::ClearForm(void)
 {
 	// Send a phony message to reset the for to
 	// its default state
-	BMessage* msg = new BMessage(OPT_CURRENT);
+	BMessage* msg = new BMessage(kOptCurrent);
 	fOptCurrent->SetValue(1);
 	MessageReceived(msg);
 	

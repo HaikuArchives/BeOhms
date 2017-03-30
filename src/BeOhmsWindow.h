@@ -42,6 +42,18 @@ public:
 	
 private:
 	
+	//Menu-Message-ID
+	static const int kMenuAppQuit 	= 1000;
+
+	//Control-Message-IDs
+	static const int kOptVoltage 	= 1001;
+	static const int kOptResistance = 1002;
+	static const int kOptCurrent 	= 1003;
+
+	//Button-Message-IDs
+	static const int kComputePressed = 1004;
+	static const int kClearPressed	= 1005;
+
 	BButton* 		fBtnCompute;
 	BButton* 		fBtnClear;
 	BBox*			fSolveGroup;
